@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Alerta Vecinos · Red Urbana de Seguridad Ciudadana</title>
+  
+  <!-- CSS Design System -->
+  <link rel="stylesheet" href="styles/variables.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/views.css">
+  
+  <!-- Leaflet Interactive Map CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body>
+
+  <!-- Presentation Outer Stage (Centered Viewport) -->
+  <div id="desktop-stage">
+    
+    <!-- Mobile Device Mockup Frame (390px x 844px) -->
+    <div id="device-frame" role="region" aria-label="Aplicación Alerta Vecinos">
+      
+      <!-- Simulated Smartphone Dynamic Island / Notch -->
+      <div class="device-island" aria-hidden="true">
+        <div class="device-island-lens"></div>
+      </div>
+
+      <!-- Smartphone Top Status Bar -->
+      <div class="status-bar" id="device-status-bar" aria-hidden="true">
+        <span class="status-bar-time" id="status-clock">14:05</span>
+        <div class="status-bar-icons">
+          <!-- Mobile Signal -->
+          <svg class="status-bar-icon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25A10.93 10.93 0 0 1 2 12C2 6.48 6.48 2 12 2s10 4.48 10 10c0 2.3-.78 4.41-2.09 6.09l-.63-.64A8.96 8.96 0 0 0 21 12c0-4.97-4.03-9-9-9zm-1 5v8h2V8h-2zm-4 4v4h2v-4H7zm8 2v2h2v-2h-2z"/></svg>
+          <!-- Wi-Fi -->
+          <svg class="status-bar-icon" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.12c3.78 0 7.23 1.44 9.84 3.8L12 18.82 2.16 10.92C4.77 8.56 8.22 7.12 12 7.12z"/></svg>
+          <!-- Battery -->
+          <svg class="status-bar-icon" viewBox="0 0 24 24"><path d="M17 5v14H7V5h10m1-2H6c-.55 0-1 .45-1 1v16c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zm-3-2H9v1h6V1z"/></svg>
+        </div>
+      </div>
+
+      <!-- App Header Bar -->
+      <header id="app-header">
+        <div class="header-left">
+          <button id="header-back-btn" class="header-back-btn" aria-label="Volver a la vista anterior" title="Volver">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div class="header-brand-group">
+            <span class="header-breadcrumb" id="header-breadcrumb">■ INICIO / MAPA</span>
+            <h1 class="header-title" id="header-title">ALERTA VECINOS</h1>
+          </div>
+        </div>
+        <div class="header-right">
+          <!-- Indicador de Usuario y Rol en Header -->
+          <div id="header-user-badge" class="header-user-badge" title="Mi Cuenta" style="cursor:pointer;">
+            <span class="user-role-pill" id="header-role-text">Vecino</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Scrollable App Viewport -->
+      <main id="app-viewport">
+        
+        <!-- Toast Notifications Container (Contextual feedback) -->
+        <div id="toast-container" aria-live="polite"></div>
+
+        <!-- =================================================================
+             VISTA 1: MAPA GEOGRÁFICO INTERACTIVO (Exclusivo mapa y herramientas)
+             ================================================================= -->
+        <section id="view-map" class="app-view active" role="region" aria-label="Mapa de Alertas y Puntos Seguros">
+          
+          <!-- Category Filter Chips -->
+          <div class="filter-chips-row" role="tablist" aria-label="Filtrar por categoría">
+            <button class="filter-chip active" data-filter="todos" role="tab" aria-selected="true">
+              Todos <span class="filter-chip-count" id="count-chip-todos">0</span>
+            </button>
+            <button class="filter-chip" data-filter="seguridad" role="tab" aria-selected="false">
+              🛡️ Seguridad <span class="filter-chip-count" id="count-chip-seguridad">0</span>
+            </button>
+            <button class="filter-chip" data-filter="iluminacion" role="tab" aria-selected="false">
+              💡 Iluminación <span class="filter-chip-count" id="count-chip-iluminacion">0</span>
+            </button>
+            <button class="filter-chip" data-filter="terrenos" role="tab" aria-selected="false">
+              🌿 Terrenos <span class="filter-chip-count" id="count-chip-terrenos">0</span>
+            </button>
+            <button class="filter-chip" data-filter="infraestructura" role="tab" aria-selected="false">
+              🚧 Vía Pública <span class="filter-chip-count" id="count-chip-infraestructura">0</span>
+            </button>
+          </div>
+
+          <!-- Interactive Map Container -->
+          <div class="map-container" id="interactive-map-wrapper">
+            
+            <!-- Floating CTA: + Crear Reporte -->
+            <button id="map-create-btn" class="map-floating-cta" aria-label="Crear nuevo reporte de incidente">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg>
+              <span>CREAR REPORTE</span>
+            </button>
+
+            <!-- Map Zoom & Center Controls -->
+            <div class="map-controls-group" aria-label="Controles del mapa">
+              <button class="map-ctrl-btn" id="btn-map-zoomin" aria-label="Aumentar zoom">+</button>
+              <button class="map-ctrl-btn" id="btn-map-zoomout" aria-label="Disminuir zoom">−</button>
+              <button class="map-ctrl-btn" id="btn-map-recenter" aria-label="Obtener y centrar en mi ubicación real" title="Mi ubicación">⌖</button>
+            </div>
+
+            <!-- Dynamic Leaflet Map Canvas -->
+            <div id="leaflet-map-canvas"></div>
+
+            <!-- Fallback SVG Canvas (Active only if offline without Leaflet) -->
+            <svg class="map-svg-canvas" id="svg-map" style="display:none;" viewBox="0 0 370 460" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Plano esquemático">
+              <rect width="100%" height="100%" fill="#f8fafc" />
+              <g id="svg-map-pins-layer"></g>
+            </svg>
+
+            <!-- Proximity Info Banner Overlay -->
+            <div class="map-proximity-bar" id="map-proximity-bar">
+              <span>📍 <strong id="proximity-count-text">Calculando alertas...</strong></span>
+              <button id="btn-refresh-map" aria-label="Actualizar datos">Actualizar</button>
+            </div>
+
+            <!-- Compact Pin Preview Overlay (Shown when marker clicked) -->
+            <div id="map-preview-card" class="map-pin-preview" role="dialog" aria-label="Previsualización de incidente">
+              <div class="card-header">
+                <div class="card-badges-group" id="preview-badges"></div>
+                <button id="preview-close-btn" class="btn btn-sm btn-outline btn-icon-only" aria-label="Cerrar previsualización">✕</button>
+              </div>
+              <h3 class="card-title" id="preview-title">Título del incidente</h3>
+              <p class="card-address" id="preview-address">Dirección</p>
+              <div class="card-actions-row">
+                <button id="preview-detail-btn" class="btn btn-primary btn-sm btn-block">Ver detalle completo →</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- =================================================================
+             VISTA 2: LISTA DE REPORTES (Listado, filtros, búsqueda y estado)
+             ================================================================= -->
+        <section id="view-reports" class="app-view" role="region" aria-label="Listado de Reportes">
+          
+          <!-- Search Input with live search -->
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="reports-search-input" class="search-input" placeholder="Buscar por título, calle o descripción..." aria-label="Buscar incidentes">
+          </div>
+
+          <!-- Category Filter Chips -->
+          <div class="filter-chips-row" id="reports-filter-chips" role="tablist">
+            <!-- Dynamic Category Chips injected by JS -->
+          </div>
+
+          <!-- Counter Bar & Actions -->
+          <div class="reports-count-bar">
+            <span id="reports-summary-count">Cargando reportes...</span>
+            <button id="btn-list-create-report" class="btn btn-sm btn-primary">
+              + Nuevo Reporte
+            </button>
+          </div>
+
+          <!-- Stream of Incident Cards -->
+          <div class="cards-stream-container" id="reports-stream-container" role="feed" aria-busy="false">
+            <!-- Cards injected by JS -->
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state-card" id="reports-empty-state" style="display:none;">
+            <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
+            <h3 class="empty-state-title">No hay reportes que coincidan</h3>
+            <p class="empty-state-text">Probá cambiando los filtros o la búsqueda.</p>
+            <button id="btn-clear-filters" class="btn btn-sm btn-primary">Mostrar todos los reportes</button>
+          </div>
+
+        </section>
+
+        <!-- =================================================================
+             VISTA 3: DETALLE DE REPORTE (Detalles, fotos, validación y moderación)
+             ================================================================= -->
+        <section id="view-detail" class="app-view" role="region" aria-label="Detalle de Incidente">
+          
+          <button id="btn-back-to-list" class="detail-nav-back">
+            ← Volver a la lista
+          </button>
+
+          <!-- Report Main Card -->
+          <div class="detail-header-card" id="detail-header-card">
+            
+            <div class="card-header">
+              <div class="card-badges-group" id="detail-badges-group"></div>
+              <span class="card-id" id="detail-report-id">#REP-000</span>
+            </div>
+
+            <h2 class="detail-title" id="detail-title">Cargando...</h2>
+            
+            <p class="card-address" id="detail-address">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span id="detail-address-text">Ubicación</span>
+            </p>
+
+            <div class="detail-meta-grid">
+              <div class="detail-meta-item">
+                <span class="detail-meta-label">Fecha y hora</span>
+                <span class="detail-meta-value" id="detail-timestamp">-</span>
+              </div>
+              <div class="detail-meta-item">
+                <span class="detail-meta-label">Publicado por</span>
+                <span class="detail-meta-value" id="detail-author">-</span>
+              </div>
+              <div class="detail-meta-item meta-full">
+                <span class="detail-meta-label">Respaldo vecinal</span>
+                <span class="detail-meta-value" id="detail-endorsements-count">-</span>
+              </div>
+            </div>
+
+            <!-- Attached Image if exists -->
+            <div id="detail-photo-wrapper" style="display:none; margin: 12px 0;">
+              <img id="detail-photo-img" src="" alt="Foto adjunta del reporte" style="width:100%; max-height:220px; object-fit:cover; border-radius:8px; border:1px solid #e2e8f0;">
+            </div>
+
+            <!-- Mini Map Preview with Exact Marker -->
+            <div class="detail-mini-map-box">
+              <div id="detail-mini-map" style="width:100%; height:140px; border-radius:8px; z-index:1;"></div>
+            </div>
+
+            <!-- Description Block -->
+            <div id="detail-description-container" style="margin-top:12px;">
+              <h4 class="form-label">Descripción de lo ocurrido</h4>
+              <p id="detail-description-text" style="font-size:14px; color:#334155; line-height:1.5; white-space:pre-wrap;"></p>
+            </div>
+
+            <!-- Content Shield (Shown if flagged in review) -->
+            <div class="content-shield" id="detail-content-shield" style="display:none; margin-top:12px;">
+              <div class="shield-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>CONTENIDO EN REVISIÓN</span>
+              </div>
+              <p class="shield-desc">
+                Este reporte fue señalado por vecinos para revisión de veracidad o normas comunitarias.
+              </p>
+              <button class="shield-unfold-btn" id="btn-unfold-description">Mostrar descripción original</button>
+              <div class="hidden-text-container" id="unfolded-desc-box"></div>
+            </div>
+
+          </div>
+
+          <!-- Community Validation Block: ¿Sigue ocurriendo? -->
+          <div class="validation-block-card" id="detail-validation-card">
+            <div class="validation-header">
+              <h3 class="validation-title">Validación comunitaria</h3>
+              <p class="validation-sub">Confirmá si esta situación sigue activa para mantener la información actualizada.</p>
+            </div>
+
+            <div class="validation-tally-bar">
+              <span id="validation-tally-text">Calculando votos de vecinos...</span>
+            </div>
+
+            <div class="validation-actions-grid" id="validation-buttons-grid">
+              <button id="btn-vote-still" class="btn btn-emerald">
+                ✓ Sigue ocurriendo (Sí)
+              </button>
+              <button id="btn-vote-not" class="btn btn-secondary">
+                ✕ Ya se resolvió (No)
+              </button>
+            </div>
+
+            <div id="validation-voted-block" style="display:none;" class="feedback-banner banner-success">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <strong>Voto registrado</strong><br>
+                Ya registraste tu validación sobre este reporte.
+              </div>
+            </div>
+          </div>
+
+          <!-- Exclusive Moderator Terminal Panel (Shown ONLY if currentUser.role === "moderador") -->
+          <div class="moderator-terminal-panel" id="moderator-terminal-panel" style="display:none;">
+            <div class="mod-panel-header">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Acciones de Moderación</span>
+            </div>
+            
+            <div class="mod-metrics-list">
+              <div><strong>Estado actual:</strong> <span id="mod-report-status">-</span></div>
+              <div><strong>Autor:</strong> <span id="mod-author-info">-</span></div>
+              <div><strong>Auditoría previa:</strong> <span id="mod-audit-info">Sin intervenciones previas</span></div>
+            </div>
+
+            <div class="mod-terminal-actions" style="margin-top:10px;">
+              <button id="btn-mod-validate" class="btn btn-emerald btn-block">
+                ✓ Validar y Publicar Oficialmente
+              </button>
+              <button id="btn-mod-resolve" class="btn btn-primary btn-block">
+                ✓ Marcar como Resuelto
+              </button>
+              <button id="btn-mod-reject" class="btn btn-secondary btn-block">
+                ✕ Rechazar Reporte
+              </button>
+              <button id="btn-mod-takedown" class="btn btn-danger btn-block">
+                🗑️ Dar de Baja Definitiva
+              </button>
+            </div>
+          </div>
+
+          <!-- Flag Content Trigger -->
+          <div style="display:flex; justify-content:center; padding:12px 0;">
+            <button id="btn-open-flag-modal" class="btn btn-outline btn-sm" style="color:var(--color-alert-red); border-color:#fca5a5;">
+              ⚠️ Señalar o denunciar este contenido
+            </button>
+          </div>
+
+        </section>
+
+        <!-- =================================================================
+             VISTA 4: CREAR REPORTE (Formulario completo con texto libre)
+             ================================================================= -->
+        <section id="view-create" class="app-view" role="region" aria-label="Crear Nuevo Reporte">
+          
+          <div class="create-form-container">
+            
+            <div class="form-header-bar">
+              <h2 class="form-main-title" style="font-size:18px; font-weight:700; color:#0f172a; margin:0 0 2px 0;">Nuevo Reporte Ciudadano</h2>
+              <p class="form-sub-title" style="font-size:12px; color:#64748b; margin:0 0 6px 0;">Completá la información del incidente para alertar a tu comunidad.</p>
+              <div class="draft-pill-indicator" id="draft-indicator">
+                <span style="display:inline-block; width:6px; height:6px; background:#16a34a; border-radius:50%; box-shadow:0 0 4px rgba(22,163,74,0.6);"></span>
+                <span>Borrador en memoria</span>
+              </div>
+            </div>
+
+            <!-- Field 1: Título Libre -->
+            <div class="form-group">
+              <label class="form-label form-label-required" for="create-title-input">Título del incidente</label>
+              <input type="text" id="create-title-input" class="form-input" placeholder="Ej: Luminaria rota, bache peligroso, semáforo fuera de servicio..." required>
+              <span class="field-error-msg" id="error-create-title" style="display:none; color:#dc2626; font-size:11px;">El título es obligatorio (mínimo 5 caracteres).</span>
+            </div>
+
+            <!-- Field 2: Categoría -->
+            <div class="form-group">
+              <label class="form-label form-label-required">Categoría</label>
+              <div class="category-grid" id="create-category-grid" role="radiogroup">
+                <button type="button" class="category-tile-btn selected" data-cat="seguridad" role="radio" aria-checked="true">
+                  <span style="font-size:18px;">🛡️</span>
+                  <span class="category-tile-title">Seguridad</span>
+                  <span style="font-size:10px; color:#64748b;">Sospechas, prevención</span>
+                </button>
+                <button type="button" class="category-tile-btn" data-cat="iluminacion" role="radio" aria-checked="false">
+                  <span style="font-size:18px;">💡</span>
+                  <span class="category-tile-title">Iluminación</span>
+                  <span style="font-size:10px; color:#64748b;">Farolas rotas, cortes</span>
+                </button>
+                <button type="button" class="category-tile-btn" data-cat="terrenos" role="radio" aria-checked="false">
+                  <span style="font-size:18px;">🌿</span>
+                  <span class="category-tile-title">Terrenos / Baldíos</span>
+                  <span style="font-size:10px; color:#64748b;">Pastizales, malezas</span>
+                </button>
+                <button type="button" class="category-tile-btn" data-cat="infraestructura" role="radio" aria-checked="false">
+                  <span style="font-size:18px;">🚧</span>
+                  <span class="category-tile-title">Vía Pública</span>
+                  <span style="font-size:10px; color:#64748b;">Veredas, baches</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Field 3: Nivel de Gravedad -->
+            <div class="form-group">
+              <label class="form-label form-label-required">Nivel de Gravedad</label>
+              <div class="severity-segmented" id="create-severity-group">
+                <button type="button" class="severity-pill-btn baja" data-sev="baja">Baja</button>
+                <button type="button" class="severity-pill-btn media selected" data-sev="media">Media</button>
+                <button type="button" class="severity-pill-btn alta" data-sev="alta">Alta</button>
+                <button type="button" class="severity-pill-btn critica" data-sev="critica">Crítica</button>
+              </div>
+            </div>
+
+            <!-- Field 4: Ubicación en el Mapa con Selección Manual o GPS -->
+            <div class="form-group">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label class="form-label form-label-required" for="create-address-input">Ubicación del Incidente</label>
+                <button type="button" id="btn-create-gps-loc" class="btn btn-sm btn-outline" style="font-size:11px; padding:2px 8px; min-height:28px;">
+                  📍 Usar mi GPS
+                </button>
+              </div>
+              <input type="text" id="create-address-input" class="form-input" placeholder="Dirección o intersección de calles..." required>
+              <span class="field-error-msg" id="error-create-address" style="display:none; color:#dc2626; font-size:11px;">La dirección es obligatoria.</span>
+
+              <div style="margin-top:6px; font-size:11px; color:#64748b;">
+                Tocá el mapa interactivo para posicionar el marcador exacto:
+              </div>
+              <!-- Mini map picker -->
+              <div id="create-map-picker" style="width:100%; height:160px; border-radius:8px; margin-top:6px; border:1px solid #cbd5e1; z-index:1;"></div>
+              <div style="font-size:10px; color:#64748b; margin-top:4px;">
+                Coordenadas fijadas: <span id="create-coords-preview">-33.1304, -64.3527</span>
+              </div>
+            </div>
+
+            <!-- Field 5: Descripción Libre y Detallada -->
+            <div class="form-group">
+              <label class="form-label form-label-required" for="create-description-input">Descripción detallada</label>
+              <textarea id="create-description-input" class="form-textarea" rows="4" placeholder="Describí con tus propias palabras qué ocurrió, detalles relevantes o referencias útiles para los vecinos..." required></textarea>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="field-error-msg" id="error-create-desc" style="display:none; color:#dc2626; font-size:11px;">Ingresá al menos 10 caracteres describiendo lo ocurrido.</span>
+                <span class="char-counter" id="create-char-counter">0 caracteres</span>
+              </div>
+            </div>
+
+            <!-- Field 6: Adjuntar Foto -->
+            <div class="form-group">
+              <label class="form-label" for="create-photo-input">Adjuntar fotografía (opcional)</label>
+              <input type="file" id="create-photo-input" accept="image/*" class="form-input" style="padding:6px;">
+              <div id="create-photo-preview-box" style="display:none; margin-top:8px;">
+                <img id="create-photo-preview-img" src="" alt="Vista previa de la foto" style="max-height:120px; border-radius:6px; border:1px solid #e2e8f0;">
+                <button type="button" id="btn-remove-photo" class="btn btn-sm btn-outline" style="margin-top:4px; font-size:11px; color:#dc2626;">Quitar imagen</button>
+              </div>
+            </div>
+
+            <!-- Field 7: Checkbox Anónimo -->
+            <div class="toggle-row">
+              <input type="checkbox" id="create-anon-checkbox">
+              <label for="create-anon-checkbox" class="toggle-label-text">
+                <span class="toggle-title">Publicar de forma anónima</span>
+                <span class="toggle-desc">Oculta tu nombre en la publicación comunitaria.</span>
+              </label>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions-footer">
+              <button type="button" id="btn-cancel-create" class="btn btn-outline" style="flex:1;">
+                Cancelar
+              </button>
+              <button type="button" id="btn-submit-create" class="btn btn-primary" style="flex:2;">
+                Guardar y Publicar Reporte
+              </button>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- =================================================================
+             VISTA 5: MODERACIÓN (Exclusiva para usuarios con rol Moderador)
+             ================================================================= -->
+        <section id="view-moderation" class="app-view" role="region" aria-label="Panel de Moderación">
+          
+          <div class="mod-dashboard-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:24px;">🛡️</span>
+              <div>
+                <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Panel de Moderación Barrial</h2>
+                <p style="font-size:12px; color:#64748b;">Gestión, validación y control de reportes comunitarios.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Moderation KPI Cards -->
+          <div class="stats-grid-3" style="margin: 12px 0;">
+            <div class="stat-tile">
+              <span class="stat-value" id="mod-kpi-review" style="color:#ea580c;">0</span>
+              <span class="stat-label">En Revisión</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value" id="mod-kpi-pending" style="color:#d97706;">0</span>
+              <span class="stat-label">Pendientes</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value" id="mod-kpi-validated" style="color:#16a34a;">0</span>
+              <span class="stat-label">Validados</span>
+            </div>
+          </div>
+
+          <!-- Queue of Reports to Moderate -->
+          <div class="mod-section-card">
+            <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:8px;">Cola de Reportes para Moderar</h3>
+            <div id="mod-reports-queue" style="display:flex; flex-direction:column; gap:8px;">
+              <!-- Queue items injected by JS -->
+            </div>
+          </div>
+
+          <!-- Audit Log of Actions -->
+          <div class="mod-section-card" style="margin-top:12px;">
+            <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:8px;">Historial de Auditoría de Moderaciones</h3>
+            <div id="mod-audit-log-list" style="display:flex; flex-direction:column; gap:6px; font-size:11px;">
+              <!-- Audit log entries injected by JS -->
+            </div>
+          </div>
+
+        </section>
+
+        <!-- =================================================================
+             VISTA 6: LLAMADA DE EMERGENCIA EN CURSO (Simulación Visual)
+             ================================================================= -->
+        <section id="view-call" class="app-view fullscreen-view" role="region" aria-label="Llamada de Emergencia">
+          <div class="call-container">
+            
+            <!-- Contact & Header Info -->
+            <div class="call-header-info">
+              <div class="call-avatar-circle" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </div>
+              <span class="call-line-badge">Central de Emergencias</span>
+              <h2 class="call-target-number">911</h2>
+              <div class="call-status-pill">
+                <span class="call-status-dot" aria-hidden="true"></span>
+                <span id="call-status-text">Llamada en curso</span>
+              </div>
+              <div class="call-timer" id="call-active-timer" aria-live="polite">00:00</div>
+            </div>
+
+            <!-- Audio Equalizer / Visualizer -->
+            <div class="equalizer-container" aria-hidden="true">
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+            </div>
+
+            <div class="call-rec-indicator" aria-hidden="true">
+              <span class="call-rec-dot"></span>
+              <span>Línea Conectada</span>
+            </div>
+
+            <!-- In-Call Secondary Actions (Smartphone dialer style) -->
+            <div class="call-actions-grid">
+              <button type="button" class="call-btn-circle" id="btn-call-mute" aria-label="Silenciar micrófono">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+                <span id="call-mute-label">Silenciar</span>
+              </button>
+              <button type="button" class="call-btn-circle" id="btn-call-keypad" aria-label="Teclado numérico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="4" height="4" rx="1"/>
+                  <rect x="10" y="3" width="4" height="4" rx="1"/>
+                  <rect x="17" y="3" width="4" height="4" rx="1"/>
+                  <rect x="3" y="10" width="4" height="4" rx="1"/>
+                  <rect x="10" y="10" width="4" height="4" rx="1"/>
+                  <rect x="17" y="10" width="4" height="4" rx="1"/>
+                  <rect x="3" y="17" width="4" height="4" rx="1"/>
+                  <rect x="10" y="17" width="4" height="4" rx="1"/>
+                  <rect x="17" y="17" width="4" height="4" rx="1"/>
+                </svg>
+                <span>Teclado</span>
+              </button>
+              <button type="button" class="call-btn-circle" id="btn-call-speaker" aria-label="Activar altavoz">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+                <span id="call-speaker-label">Altavoz</span>
+              </button>
+            </div>
+
+            <!-- Hang-up Button -->
+            <div class="call-footer-actions">
+              <button type="button" id="btn-end-call" class="btn-end-call" aria-label="Finalizar llamada de emergencia">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(135deg);">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <span>Finalizar llamada</span>
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- =================================================================
+             VISTA 7: ASISTENCIA Y PUNTOS SEGUROS (Lugares seguros cercanos)
+             ================================================================= -->
+        <section id="view-emergency" class="app-view" role="region" aria-label="Asistencia y Emergencias">
+          
+          <div class="emergency-view-container">
+            <div class="emergency-cta-box">
+              <h2 style="font-size:18px; font-weight:800; color:#7f1d1d; margin-bottom:4px;">Central de Asistencia y Emergencias</h2>
+              <p style="font-size:13px; color:#475569; margin-bottom:14px;">
+                Para hechos delictivos flagrantes o urgencias médicas, comunicate de inmediato con las líneas telefónicas oficiales:
+              </p>
+
+              <!-- Real Phone Dialer Button for 911 -->
+              <a href="tel:911" class="btn btn-danger emergency-call-btn" style="min-height:48px; padding:12px 16px; font-size:16px; font-weight:700; letter-spacing:0.3px; box-shadow:0 4px 14px rgba(220,38,38,0.35); display:flex; align-items:center; justify-content:center; gap:8px; width:100%; box-sizing:border-box; text-decoration:none;">
+                <span>🚨</span> <span>Llamar al 911</span>
+              </a>
+            </div>
+
+            <!-- Emergency Phone Directory (Río Cuarto) -->
+            <div class="incident-card" style="margin-top:14px;">
+              <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:4px;">Líneas Telefónicas Directas</h3>
+              <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Llamadas inmediatas a servicios oficiales de Río Cuarto:</p>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <a href="tel:101" class="btn btn-outline btn-sm" style="justify-content:flex-start; font-size:12px; font-weight:600;">
+                  👮 Policía Cba (101)
+                </a>
+                <a href="tel:100" class="btn btn-outline btn-sm" style="justify-content:flex-start; font-size:12px; font-weight:600;">
+                  🚒 Bomberos (100)
+                </a>
+                <a href="tel:107" class="btn btn-outline btn-sm" style="justify-content:flex-start; font-size:12px; font-weight:600;">
+                  🚑 Médica SAME (107)
+                </a>
+                <a href="tel:103" class="btn btn-outline btn-sm" style="justify-content:flex-start; font-size:12px; font-weight:600;">
+                  🛡️ Defensa Civil (103)
+                </a>
+                <a href="tel:102" class="btn btn-outline btn-sm" style="justify-content:flex-start; font-size:12px; font-weight:600;">
+                  🧒 Niñez (102)
+                </a>
+                <a href="tel:144" class="btn btn-outline btn-sm" style="justify-content:flex-start; font-size:12px; font-weight:600;">
+                  💜 Género (144)
+                </a>
+              </div>
+            </div>
+
+            <!-- WhatsApp Ojos en Alerta Municipal Card -->
+            <div class="incident-card whatsapp-emergency-box" style="margin-top:12px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                <span style="font-size:20px;">📱</span>
+                <div>
+                  <h3 style="font-size:14px; font-weight:800; color:#14532d; margin:0;">Ojos en Alerta · Río Cuarto</h3>
+                  <span style="font-size:11px; color:#166534;">Canal municipal directo de seguridad vecinal</span>
+                </div>
+              </div>
+              <p style="font-size:12px; color:#15803d; margin:6px 0 10px 0; line-height:1.4;">
+                Enviá fotos, audios o ubicación en tiempo real directamente al centro de monitoreo municipal de Río Cuarto.
+              </p>
+              <a href="https://wa.me/5493584283693?text=Hola%2C%20necesito%20comunicar%20una%20situaci%C3%B3n%20en%20R%C3%ADo%20Cuarto" target="_blank" rel="noopener noreferrer" class="whatsapp-call-btn">
+                <span>💬 Escribir por WhatsApp (+54 9 358 428 3693)</span>
+              </a>
+            </div>
+
+            <!-- Safe Points Section & Interactive Map -->
+            <div class="incident-card" style="margin-top:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h3 style="font-size:14px; font-weight:700; color:#0f172a;">Puntos Seguros e Instituciones de Río Cuarto</h3>
+                <span class="badge badge-info" id="safe-points-count">8 Puntos</span>
+              </div>
+              <p style="font-size:12px; color:#64748b; margin-bottom:10px;">
+                Lugares físicos de resguardo vecinal, hospitales, dispensarios 24 hs y destacamentos de Río Cuarto:
+              </p>
+
+              <!-- Category Filter Chips -->
+              <div class="assistance-filter-row" role="tablist" aria-label="Filtrar instituciones por categoría">
+                <button class="filter-chip active" data-assistance-filter="todos" role="tab" aria-selected="true">
+                  Todos
+                </button>
+                <button class="filter-chip" data-assistance-filter="salud" role="tab" aria-selected="false">
+                  🩺 Salud
+                </button>
+                <button class="filter-chip" data-assistance-filter="policia" role="tab" aria-selected="false">
+                  👮 Policía
+                </button>
+                <button class="filter-chip" data-assistance-filter="bomberos" role="tab" aria-selected="false">
+                  🚒 Bomberos
+                </button>
+                <button class="filter-chip" data-assistance-filter="defensa_civil" role="tab" aria-selected="false">
+                  🛡️ Defensa Civil
+                </button>
+              </div>
+              
+              <!-- Map of Safe Points with floating locate button -->
+              <div style="position:relative; margin-bottom:12px;">
+                <div id="emergency-safe-map" style="width:100%; height:230px; border-radius:8px; border:1px solid #cbd5e1; z-index:1;"></div>
+                <button id="btn-emergency-recenter" class="map-ctrl-btn" style="position:absolute; right:10px; bottom:10px; z-index:10; background:#ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.25);" aria-label="Centrar en mi ubicación" title="Mi ubicación">⌖</button>
+              </div>
+
+              <div id="safe-points-list" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- Safe points injected by JS -->
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- =================================================================
+             VISTA 7: PERFIL Y AUTENTICACIÓN (Gestión de cuenta y sesión real)
+             ================================================================= -->
+        <section id="view-profile" class="app-view" role="region" aria-label="Perfil de Usuario">
+          
+          <!-- Estado Conectado -->
+          <div id="profile-logged-in-section" style="display:none;">
+            <div class="user-card">
+              <div class="user-avatar-circle" id="profile-avatar">FR</div>
+              <div class="user-info-text">
+                <h2 class="user-name" id="profile-user-name">Facundo Rullo</h2>
+                <span class="user-sub" id="profile-user-email">vecino@alerta.org</span>
+                <div style="margin-top:4px;">
+                  <span class="badge" id="profile-role-badge">Rol: Vecino</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Personal Activity Stats -->
+            <div class="stats-grid-3" style="margin: 12px 0;">
+              <div class="stat-tile">
+                <span class="stat-value" id="profile-my-reports-count">0</span>
+                <span class="stat-label">Mis Reportes</span>
+              </div>
+              <div class="stat-tile">
+                <span class="stat-value" id="profile-my-votes-count">0</span>
+                <span class="stat-label">Validaciones</span>
+              </div>
+              <div class="stat-tile">
+                <span class="stat-value" id="profile-user-barrio">Centro</span>
+                <span class="stat-label">Barrio</span>
+              </div>
+            </div>
+
+            <!-- Mis Reportes Creados -->
+            <div class="incident-card" style="margin-top:12px;">
+              <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:8px;">Historial de mis reportes</h3>
+              <div id="profile-my-reports-list" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- List injected by JS -->
+              </div>
+            </div>
+
+            <div style="margin-top:16px;">
+              <button id="btn-profile-logout" class="btn btn-outline btn-block" style="color:#b91c1c; border-color:#fca5a5;">
+                Cerrar Sesión
+              </button>
+            </div>
+          </div>
+
+          <!-- Estado No Conectado (Formulario de Login y Registro Real) -->
+          <div id="profile-guest-section" style="display:block;">
+            
+            <div class="user-card" style="flex-direction:column; text-align:center; padding:20px;">
+              <span style="font-size:36px;">👤</span>
+              <h2 style="font-size:16px; font-weight:700; color:#0f172a; margin-top:8px;">Identificate en Alerta Vecinos</h2>
+              <p style="font-size:12px; color:#64748b;">Iniciá sesión para publicar reportes, validar alertas de otros vecinos y acceder a tus gestiones.</p>
+            </div>
+
+            <!-- Auth Tabs (Login vs Register) -->
+            <div class="role-segmented-control" style="margin: 12px 0;">
+              <button type="button" class="role-btn active" id="tab-auth-login">Iniciar Sesión</button>
+              <button type="button" class="role-btn" id="tab-auth-register">Registrarme</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-login" class="create-form-container" style="gap:10px;">
+              <div class="form-group">
+                <label class="form-label" for="login-email">Correo Electrónico</label>
+                <input type="email" id="login-email" class="form-input" placeholder="tu.correo@ejemplo.com" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="login-password">Contraseña</label>
+                <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+              </div>
+              <span id="login-error-msg" style="display:none; color:#dc2626; font-size:12px; font-weight:600;"></span>
+              <button type="submit" class="btn btn-primary btn-block" style="margin-top:6px;">
+                Ingresar
+              </button>
+            </form>
+
+            <!-- Register Form (Initially Hidden) -->
+            <form id="form-register" class="create-form-container" style="display:none; gap:10px;">
+              <div class="form-group">
+                <label class="form-label" for="reg-name">Nombre y Apellido</label>
+                <input type="text" id="reg-name" class="form-input" placeholder="Ej: Juan Pérez" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-email">Correo Electrónico</label>
+                <input type="email" id="reg-email" class="form-input" placeholder="tu.correo@ejemplo.com" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-barrio">Barrio de Río Cuarto</label>
+                <input type="text" id="reg-barrio" class="form-input" placeholder="Ej: Centro / Banda Norte / Alberdi" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-password">Contraseña</label>
+                <input type="password" id="reg-password" class="form-input" placeholder="Mínimo 6 caracteres" required>
+              </div>
+              <span id="register-error-msg" style="display:none; color:#dc2626; font-size:12px; font-weight:600;"></span>
+              <button type="submit" class="btn btn-primary btn-block" style="margin-top:6px;">
+                Crear Cuenta de Vecino
+              </button>
+            </form>
+
+            <!-- Quick Access Demo Accounts -->
+            <div class="role-switcher-card" style="margin-top:14px;">
+              <h3 style="font-size:13px; font-weight:700; color:#0f172a;">Acceso rápido para evaluación de roles:</h3>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="button" class="btn btn-secondary btn-block" id="btn-quick-vecino" style="justify-content:flex-start; text-align:left;">
+                  <span style="font-size:18px;">👤</span>
+                  <div>
+                    <div style="font-weight:700;">Facundo Rullo (Rol: Vecino)</div>
+                    <div style="font-size:11px; color:#64748b;">vecino@alerta.org · Centro (Río Cuarto)</div>
+                  </div>
+                </button>
+                <button type="button" class="btn btn-secondary btn-block" id="btn-quick-moderador" style="justify-content:flex-start; text-align:left;">
+                  <span style="font-size:18px;">🛡️</span>
+                  <div>
+                    <div style="font-weight:700;">Laura Paz (Rol: Moderadora)</div>
+                    <div style="font-size:11px; color:#64748b;">moderador@alerta.org · Acceso a moderación</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </main>
+
+      <!-- Bottom Emergency Bar (Persistent quick call access) -->
+      <aside id="emergency-bar" role="complementary" aria-label="Acceso Rápido a Asistencia y Emergencia">
+        <div class="emergency-wrapper">
+          <!-- Hold Button (3-Second Ring Interaction) -->
+          <button id="btn-emergency-hold" class="emergency-hold-btn" aria-label="Mantener presionado 3 segundos para activar asistencia y emergencias">
+            <div class="emergency-progress-fill" id="emergency-progress-fill"></div>
+            
+            <div class="emergency-btn-content">
+              <div class="emergency-icon-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </div>
+              <div class="emergency-btn-text">
+                <span class="emergency-btn-label">ASISTENCIA Y EMERGENCIAS</span>
+                <span class="emergency-btn-sub">MANTENER PRESIONADO 3 SEGUNDOS</span>
+              </div>
+            </div>
+
+            <div class="emergency-ring-container">
+              <svg class="emergency-ring-svg" viewBox="0 0 40 40">
+                <circle cx="20" cy="20" r="16" class="emergency-ring-bg"></circle>
+                <circle cx="20" cy="20" r="16" class="emergency-ring-fg" id="emergency-ring-fg"></circle>
+              </svg>
+              <span class="emergency-ring-seconds" id="emergency-ring-text">3s</span>
+            </div>
+          </button>
+
+        </div>
+      </aside>
+
+      <!-- Persistent Bottom Navigation Bar -->
+      <nav id="bottom-nav" aria-label="Navegación principal">
+        
+        <button class="nav-item active" id="nav-tab-map" data-view="map" aria-label="Ir al Mapa" aria-selected="true" role="tab">
+          <svg class="nav-item-icon" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+          <span>MAPA</span>
+        </button>
+
+        <button class="nav-item" id="nav-tab-reports" data-view="reports" aria-label="Ir a Reportes" aria-selected="false" role="tab">
+          <svg class="nav-item-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>REPORTES</span>
+        </button>
+
+        <button class="nav-item" id="nav-tab-emergency" data-view="emergency" aria-label="Ir a Asistencia" aria-selected="false" role="tab">
+          <svg class="nav-item-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>ASISTENCIA</span>
+        </button>
+
+        <!-- Moderation Tab (Visible ONLY for moderators) -->
+        <button class="nav-item" id="nav-tab-moderation" data-view="moderation" style="display:none;" aria-label="Ir a Moderación" aria-selected="false" role="tab">
+          <svg class="nav-item-icon" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <span>MODERACIÓN</span>
+          <span class="nav-badge-pill" id="nav-badge-moderation" style="display:none;">0</span>
+        </button>
+
+        <button class="nav-item" id="nav-tab-profile" data-view="profile" aria-label="Ir a Perfil" aria-selected="false" role="tab">
+          <svg class="nav-item-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>PERFIL</span>
+        </button>
+
+      </nav>
+
+      <!-- =================================================================
+           MODAL 1: IDENTIFICACIÓN CONTEXTUAL (Para publicar sin perder borrador)
+           ================================================================= -->
+      <div id="modal-contextual-auth" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+        <div class="modal-sheet">
+          <div class="modal-header">
+            <div class="modal-title-group">
+              <span class="modal-step-tag">IDENTIFICACIÓN REQUERIDA</span>
+              <h3 class="modal-title" id="auth-modal-title">Iniciá sesión para publicar</h3>
+            </div>
+            <button class="modal-close-btn" id="auth-modal-close" aria-label="Cerrar y volver al borrador">✕</button>
+          </div>
+          <div class="modal-body" style="overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:12px;">
+            
+            <div class="feedback-banner banner-info" style="margin-bottom:14px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <div>
+                <strong>Tu borrador está a salvo:</strong><br>
+                Los datos que ingresaste están guardados. Una vez que te identifiques, el reporte se publicará automáticamente.
+              </div>
+            </div>
+
+            <!-- VISTA 1: PRINCIPAL (Cuentas recordadas + Formulario manual) -->
+            <div id="auth-view-main">
+              <!-- Cuentas utilizadas anteriormente (Opción B: solo si existen cuentas recordadas reales) -->
+              <div id="remembered-accounts-section" style="margin-bottom:14px; display:none;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                  <div style="height:1px; flex:1; background:#e2e8f0;"></div>
+                  <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Cuentas utilizadas anteriormente</span>
+                  <div style="height:1px; flex:1; background:#e2e8f0;"></div>
+                </div>
+
+                <div id="remembered-accounts-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+
+                <div id="auth-other-account-divider" style="display:flex; align-items:center; gap:8px; margin:16px 0 12px;">
+                  <div style="height:1px; flex:1; background:#e2e8f0;"></div>
+                  <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">O ingresar con otra cuenta</span>
+                  <div style="height:1px; flex:1; background:#e2e8f0;"></div>
+                </div>
+              </div>
+
+              <!-- Formulario de autenticación tradicional (Opción A) -->
+              <form id="auth-modal-form" onsubmit="return false;" novalidate>
+                <div class="form-group" style="margin-bottom:10px;">
+                  <label class="form-label form-label-required" for="auth-modal-email">Correo electrónico</label>
+                  <input type="email" id="auth-modal-email" class="form-input" placeholder="ejemplo@alerta.org" autocomplete="email" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label form-label-required" for="auth-modal-password">Contraseña</label>
+                  <div style="position:relative; display:flex; align-items:center;">
+                    <input type="password" id="auth-modal-password" class="form-input" placeholder="Tu contraseña" autocomplete="current-password" required style="padding-right:42px;">
+                    <button type="button" id="btn-toggle-modal-password" aria-label="Mostrar u ocultar contraseña" style="position:absolute; right:8px; background:none; border:none; color:#64748b; cursor:pointer; padding:6px; display:flex; align-items:center; justify-content:center; font-size:16px;">
+                      👁️
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Mensaje de error dinámico -->
+                <div id="auth-modal-error" class="field-error-msg" style="display:none; color:#dc2626; font-size:12px; margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; padding:8px 12px; border-radius:6px; line-height:1.4;"></div>
+
+                <button type="submit" id="btn-modal-login-submit" class="btn btn-primary btn-block" style="min-height:44px; font-weight:700;">
+                  <span id="btn-modal-login-label">Iniciar sesión y publicar</span>
+                  <span id="btn-modal-login-spinner" style="display:none;" class="spinner-sm"></span>
+                </button>
+              </form>
+            </div>
+
+            <!-- VISTA 2: CUENTA RECORDADA SELECCIONADA (Formulario específico para la cuenta) -->
+            <div id="auth-view-selected-account" style="display:none;">
+              <!-- Tarjeta resumen de la cuenta seleccionada -->
+              <div class="selected-account-card" style="margin-bottom:14px;">
+                <div class="remembered-account-info">
+                  <div class="remembered-avatar" id="selected-account-avatar">U</div>
+                  <div class="remembered-text">
+                    <div class="remembered-name-row">
+                      <span class="remembered-name" id="selected-account-name">Vecino</span>
+                      <span id="selected-account-role-badge"></span>
+                    </div>
+                    <div class="remembered-email" id="selected-account-email">correo@alerta.org · Barrio</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Formulario de contraseña para la cuenta seleccionada -->
+              <form id="selected-account-form" onsubmit="return false;" novalidate>
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label form-label-required" for="selected-account-password">Contraseña para esta cuenta</label>
+                  <div style="position:relative; display:flex; align-items:center;">
+                    <input type="password" id="selected-account-password" class="form-input" placeholder="Ingresá tu contraseña" autocomplete="current-password" required style="padding-right:42px;">
+                    <button type="button" id="btn-toggle-selected-password" aria-label="Mostrar u ocultar contraseña" style="position:absolute; right:8px; background:none; border:none; color:#64748b; cursor:pointer; padding:6px; display:flex; align-items:center; justify-content:center; font-size:16px;">
+                      👁️
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Mensaje de error dinámico de cuenta seleccionada -->
+                <div id="selected-account-error" class="field-error-msg" style="display:none; color:#dc2626; font-size:12px; margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; padding:8px 12px; border-radius:6px; line-height:1.4;"></div>
+
+                <button type="submit" id="btn-selected-account-submit" class="btn btn-primary btn-block" style="min-height:44px; font-weight:700;">
+                  <span id="btn-selected-account-label">Iniciar sesión y publicar</span>
+                  <span id="btn-selected-account-spinner" style="display:none;" class="spinner-sm"></span>
+                </button>
+
+                <button type="button" id="btn-switch-account" class="btn btn-outline btn-block" style="margin-top:10px; font-size:13px; font-weight:600;">
+                  ← Elegir otra cuenta
+                </button>
+              </form>
+            </div>
+
+          </div>
+          <div class="modal-footer" style="padding-top:8px;">
+            <button id="btn-back-to-draft" class="btn btn-outline btn-block">
+              Volver al formulario
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================================================================
+           MODAL 2: DENUNCIA DE CONTENIDO (Flujo de reporte de irregularidad)
+           ================================================================= -->
+      <div id="modal-flag-report" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="flag-modal-title">
+        <div class="modal-sheet">
+          <div class="modal-header">
+            <div class="modal-title-group">
+              <span class="modal-step-tag">Revisión de Seguridad</span>
+              <h3 class="modal-title" id="flag-modal-title">Denunciar Contenido</h3>
+              <span id="flag-modal-report-ref" style="font-size:12px; font-weight:600; color:#dc2626; margin-top:2px;">Reporte</span>
+            </div>
+            <button class="modal-close-btn" id="flag-modal-close" aria-label="Cerrar diálogo">✕</button>
+          </div>
+          <div class="modal-body">
+            <p style="font-size:13px; color:#475569; margin-bottom:10px;">
+              Indicanos el motivo de la denuncia para que el equipo de moderación revise este reporte:
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:8px;" id="flag-reasons-group" role="radiogroup">
+              <label class="toggle-row" style="cursor:pointer;">
+                <input type="radio" name="flag-reason" value="Información falsa o engañosa" checked>
+                <div class="toggle-label-text">
+                  <span class="toggle-title">Información falsa o engañosa</span>
+                  <span class="toggle-desc">El incidente no ocurrió o los datos son incorrectos.</span>
+                </div>
+              </label>
+
+              <label class="toggle-row" style="cursor:pointer;">
+                <input type="radio" name="flag-reason" value="Contenido ofensivo o agresivo">
+                <div class="toggle-label-text">
+                  <span class="toggle-title">Contenido ofensivo o agresivo</span>
+                  <span class="toggle-desc">Lenguaje inapropiado o acusaciones directas.</span>
+                </div>
+              </label>
+
+              <label class="toggle-row" style="cursor:pointer;">
+                <input type="radio" name="flag-reason" value="Spam o publicidad">
+                <div class="toggle-label-text">
+                  <span class="toggle-title">Spam o comercio no relacionado</span>
+                  <span class="toggle-desc">Publicidad o mensajes fuera de contexto.</span>
+                </div>
+              </label>
+
+              <label class="toggle-row" style="cursor:pointer;">
+                <input type="radio" name="flag-reason" value="Incidente duplicado o inexistente">
+                <div class="toggle-label-text">
+                  <span class="toggle-title">Incidente duplicado o resuelto</span>
+                  <span class="toggle-desc">Ya fue reportado previamente o ya no existe en el lugar.</span>
+                </div>
+              </label>
+            </div>
+
+            <div style="margin-top:12px;">
+              <label for="flag-modal-notes" style="display:block; font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.4px;">Detalle adicional (opcional)</label>
+              <textarea id="flag-modal-notes" class="form-textarea" rows="2" placeholder="Agregá aclaraciones que ayuden a evaluar la situación..." style="width:100%; box-sizing:border-box; font-size:12px; border-radius:6px; border:1px solid #cbd5e1; padding:8px; resize:none; font-family:inherit;"></textarea>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button id="btn-submit-flag-confirm" class="btn btn-danger btn-block">
+              Enviar Denuncia a Moderación
+            </button>
+            <button id="btn-cancel-flag" class="btn btn-outline btn-block">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+    
+    </div><!-- End #device-frame -->
+
+  </div><!-- End #desktop-stage -->
+
+  <!-- JavaScript Entry Point -->
+  <script src="js/app.js"></script>
+</body>
+</html>

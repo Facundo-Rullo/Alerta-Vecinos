@@ -1,0 +1,1083 @@
+/**
+ * Alerta Vecinos - View Specific Styles
+ * Map, List, Detail, Form, Profile, Community & Offline Error Views
+ */
+
+/* ==========================================================================
+   1. MAP VIEW (#view-map)
+   ========================================================================== */
+
+#view-map {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  background-color: #e2e8f0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+#leaflet-map-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f1f5f9;
+  z-index: 1;
+}
+
+.map-svg-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  background: #f1f5f9;
+  display: block;
+}
+
+/* Map street and landscape styling */
+.map-bg-land { fill: #f8fafc; }
+.map-street-grid { stroke: #e2e8f0; stroke-width: 16; stroke-linecap: round; }
+.map-street-main { stroke: #cbd5e1; stroke-width: 22; stroke-linecap: round; }
+.map-street-label { font-size: 8px; fill: #64748b; font-weight: 600; text-anchor: middle; }
+.map-railroad { stroke: #94a3b8; stroke-width: 4; stroke-dasharray: 4,4; fill: none; }
+.map-park { fill: #dcfce7; stroke: #bbf7d0; stroke-width: 2; rx: 8; }
+.map-park-label { font-size: 9px; fill: #166534; font-weight: 700; text-anchor: middle; }
+.map-shelter { fill: #bfdbfe; stroke: #60a5fa; stroke-width: 2; rx: 6; }
+
+/* Interactive Map Markers */
+.map-marker-group {
+  cursor: pointer;
+  transition: transform 150ms ease;
+  outline: none;
+}
+
+.map-marker-group:hover,
+.map-marker-group:focus-visible {
+  transform: scale(1.15);
+}
+
+.marker-halo {
+  animation: markerPulse 2s infinite ease-out;
+}
+
+@keyframes markerPulse {
+  0% { r: 14; opacity: 0.6; }
+  100% { r: 24; opacity: 0; }
+}
+
+.marker-pin-circle {
+  stroke: #ffffff;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+.marker-number-text {
+  font-family: var(--font-family);
+  font-size: 10px;
+  font-weight: 800;
+  fill: #ffffff;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.marker-label-box {
+  fill: #0f172a;
+  rx: 4;
+}
+
+.marker-label-text {
+  font-family: var(--font-family);
+  font-size: 8px;
+  font-weight: 600;
+  fill: #ffffff;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* User Location Marker */
+.user-marker-circle {
+  fill: #2563eb;
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
+.user-marker-pulse {
+  fill: rgba(37, 99, 235, 0.3);
+  animation: markerPulse 1.8s infinite;
+}
+
+/* Map Floating Controls */
+.map-controls-group {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 500;
+}
+
+.map-ctrl-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-slate-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.map-ctrl-btn:hover {
+  background-color: var(--color-slate-100);
+}
+
+/* Floating Create Report CTA */
+.map-floating-cta {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: var(--color-slate-900);
+  color: #ffffff;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-md);
+  border: none;
+  cursor: pointer;
+}
+
+.map-floating-cta:hover {
+  background-color: var(--color-slate-800);
+}
+
+/* Proximity Banner Overlay */
+.map-proximity-bar {
+  position: absolute;
+  top: 52px;
+  left: var(--space-3);
+  right: auto;
+  max-width: calc(100% - 70px);
+  z-index: 500;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: #ffffff;
+  backdrop-filter: blur(6px);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+}
+
+.map-proximity-bar span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.map-proximity-bar button {
+  background: transparent;
+  border: none;
+  color: #38bdf8;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 10px;
+  padding: 0;
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+/* Compact Pin Preview Card Overlay */
+.map-pin-preview {
+  position: absolute;
+  bottom: calc(var(--emergency-bar-height) + var(--bottom-nav-height) + 12px);
+  left: var(--space-3);
+  right: var(--space-3);
+  z-index: 500;
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-3);
+  display: none;
+  flex-direction: column;
+  gap: var(--space-2);
+  animation: slideUpPreview 180ms ease-out;
+}
+
+.map-pin-preview.visible {
+  display: flex;
+}
+
+@keyframes slideUpPreview {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   2. PREVENTIVE SAFE MAP VIEW (#view-map-preventive)
+   ========================================================================== */
+
+.preventive-banner-top {
+  background-color: var(--color-emerald-light);
+  border-bottom: 1px solid var(--color-emerald-border);
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: #14532d;
+  font-weight: var(--font-weight-semibold);
+}
+
+.preventive-telemetry-box {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin: var(--space-3);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.telemetry-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-2xs);
+  color: var(--color-slate-600);
+}
+
+.telemetry-tag {
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-blue);
+}
+
+/* ==========================================================================
+   3. REPORTS LIST VIEW (#view-reports)
+   ========================================================================== */
+
+#view-reports {
+  padding: var(--space-3);
+  padding-bottom: var(--bottom-clearance-height);
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input-wrapper svg {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  stroke: var(--color-slate-400);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px 8px 40px;
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-slate-900);
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.reports-count-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-slate-500);
+}
+
+.cards-stream-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Empty State */
+.empty-state-card {
+  background-color: #ffffff;
+  border: 2px dashed var(--color-slate-300);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  stroke: var(--color-slate-400);
+  stroke-width: 1.5;
+}
+
+.empty-state-title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-slate-800);
+}
+
+.empty-state-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-slate-500);
+  max-width: 280px;
+}
+
+/* ==========================================================================
+   4. DETAIL VIEW (#view-detail)
+   ========================================================================== */
+
+#view-detail {
+  padding: var(--space-3);
+  padding-bottom: var(--bottom-clearance-height);
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.detail-header-card {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.detail-nav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-blue);
+  cursor: pointer;
+  align-self: flex-start;
+  padding: 4px 0;
+}
+
+.detail-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-slate-900);
+  line-height: var(--line-height-tight);
+}
+
+.detail-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3);
+  background-color: var(--color-slate-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-slate-200);
+  margin: var(--space-3) 0;
+}
+
+.detail-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-meta-item.meta-full {
+  grid-column: 1 / -1;
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--color-slate-200);
+}
+
+.detail-meta-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-meta-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-slate-800);
+  line-height: 1.35;
+}
+
+/* Mini Location Map Preview in Detail */
+.detail-mini-map {
+  width: 100%;
+  height: 120px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: #f1f5f9;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Community Validation Block (Flujo 4) */
+.validation-block-card {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.validation-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.validation-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-slate-900);
+}
+
+.validation-sub {
+  font-size: var(--font-size-xs);
+  color: var(--color-slate-600);
+}
+
+.validation-tally-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-slate-50);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-slate-700);
+}
+
+.validation-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.validation-actions-grid .btn {
+  width: 100%;
+  justify-content: center;
+  min-height: 44px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  box-sizing: border-box;
+  padding: 10px 14px;
+}
+
+.validation-btn-voted {
+  grid-column: 1 / -1;
+  background-color: var(--color-emerald-light);
+  color: #15803d;
+  border: 1px solid var(--color-emerald-border);
+  font-weight: var(--font-weight-bold);
+  cursor: default;
+}
+
+/* Moderator Action Panel (Pantalla 14) */
+.moderator-terminal-panel {
+  background-color: #fffbeb;
+  border: 2px solid #fde68a;
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.mod-panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: #92400e;
+  text-transform: uppercase;
+}
+
+.mod-metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: #78350f;
+  background: rgba(255, 255, 255, 0.7);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.mod-terminal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ==========================================================================
+   5. CREATE REPORT FORM VIEW (#view-create)
+   ========================================================================== */
+
+#view-create {
+  padding: var(--space-3);
+  padding-bottom: var(--bottom-clearance-height);
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.create-form-container {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-header-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.draft-pill-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-emerald);
+  font-weight: var(--font-weight-semibold);
+  margin-top: 4px;
+  padding: 3px 8px;
+  background-color: var(--color-emerald-light);
+  border: 1px solid var(--color-emerald-border);
+  border-radius: var(--radius-full);
+}
+
+.form-actions-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* ==========================================================================
+   6. PROFILE & ROLE SWITCH VIEW (#view-profile)
+   ========================================================================== */
+
+#view-profile {
+  padding: var(--space-3);
+  padding-bottom: var(--bottom-clearance-height);
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.user-card {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.user-avatar-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.user-info-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-slate-900);
+}
+
+.user-sub {
+  font-size: var(--font-size-xs);
+  color: var(--color-slate-500);
+}
+
+/* Role Switcher Box (ADR-029) */
+.role-switcher-card {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.role-segmented-control {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background-color: var(--color-slate-100);
+  padding: 4px;
+  border-radius: var(--radius-md);
+}
+
+.role-btn {
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-slate-600);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.role-btn.active {
+  background-color: #ffffff;
+  color: var(--color-slate-900);
+  box-shadow: var(--shadow-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ==========================================================================
+   7. COMMUNITY DASHBOARD VIEW (#view-community)
+   ========================================================================== */
+
+#view-community {
+  padding: var(--space-3);
+  padding-bottom: var(--bottom-clearance-height);
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.stats-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.stat-tile {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-blue);
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-slate-500);
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   8. ERROR & OFFLINE CONTINGENCY VIEW (#view-error)
+   ========================================================================== */
+
+#view-error {
+  padding: var(--space-4);
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  background-color: #ffffff;
+  min-height: 100%;
+}
+
+.error-diagnostic-card {
+  background-color: #f8fafc;
+  border: 1px solid var(--color-slate-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xs);
+  color: var(--color-slate-600);
+  width: 100%;
+  text-align: left;
+}
+
+.protocol-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  text-align: left;
+  width: 100%;
+}
+
+.protocol-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-slate-700);
+  background-color: #f1f5f9;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+}
+
+.step-num-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-slate-800);
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   9. MODERATOR DASHBOARD VIEW (#view-moderation)
+   ========================================================================== */
+
+#view-moderation {
+  padding: var(--space-3);
+  padding-bottom: var(--bottom-clearance-height);
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.mod-dashboard-header {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+
+.mod-section-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mod-queue-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mod-queue-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mod-queue-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.mod-audit-item {
+  padding: 6px 8px;
+  background: #f8fafc;
+  border-left: 3px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   10. ASSISTANCE & SAFE POINTS VIEW (#view-emergency)
+   ========================================================================== */
+
+#view-emergency {
+  padding: var(--space-3);
+  padding-bottom: var(--bottom-clearance-height);
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.emergency-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.emergency-cta-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.emergency-call-btn {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+  margin: 0 auto;
+  text-decoration: none;
+  color: #ffffff;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.emergency-call-btn:hover {
+  background-color: var(--color-alert-red-hover);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
+}
+
+.emergency-call-btn:active {
+  transform: scale(0.98);
+}
+
+.safe-point-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.safe-point-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.safe-point-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.safe-point-card-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.safe-point-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.safe-point-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.safe-point-address {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.safe-point-phone {
+  font-size: 11px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* WhatsApp Ojos en Alerta Box */
+.whatsapp-emergency-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.whatsapp-call-btn {
+  background-color: #25d366;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35);
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.whatsapp-call-btn:hover {
+  background-color: #1eb956;
+  color: #ffffff;
+}
+
+.whatsapp-call-btn:active {
+  transform: scale(0.98);
+}
+
+/* Category filter row in Assistance view */
+.assistance-filter-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 2px 8px 2px;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 8px;
+}
+
+.assistance-filter-row .filter-chip {
+  flex-shrink: 0;
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+/* Pulsating Live Location Pin (Google Maps Style) */
+.user-live-location-pin {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-live-core {
+  width: 14px;
+  height: 14px;
+  background-color: #2563eb;
+  border: 2.5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+  position: relative;
+  z-index: 2;
+}
+
+.user-live-pulse {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.32);
+  animation: live-pulse-anim 2s infinite ease-out;
+  z-index: 1;
+}
+
+@keyframes live-pulse-anim {
+  0% {
+    transform: scale(0.4);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.map-ctrl-btn.active-follow {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  border-color: #93c5fd !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25) !important;
+}
+
+
